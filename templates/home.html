@@ -1,0 +1,108 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<style>
+  @font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  src: url(/fonts.gstatic.com/s/poppins/v15/pxiEyp8kv8JHgFVrJJbecmNE.woff2) format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+}
+</style>
+</head>
+<body>
+
+<div class="s004">
+<form>
+<fieldset>
+  <div><legend><span style="color:#630031;">VT</span> Search</legend></div>
+<div class="inner-form">
+<div class="input-field">
+<input class="form-control" id="choices-text-preset-values" type="text" style="border-radius: 5rem; padding:1.2rem 1.5rem;" placeholder="Type to search..." />
+<button class="btn-search" type="button" id="search_button">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+</svg>
+</button>
+</div>
+</div>
+</fieldset>
+</form>
+</div>
+<div style="width:100%; padding: 4% 10%; background:#Fff; display:none;" id="search_results_wrapper">
+  </div>
+</div>
+
+
+
+<div id="loading_icon" style="width:100%; height:100; position:fixed; top:0; left:0; min-height:100%; display:none;">
+  <div style="position:absolute; top: 10%; left:45%;">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: rgba(255, 255, 255, 0); display: block;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+  <circle cx="30" cy="50" fill="#630031" r="20">
+    <animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1" values="30;70;30" begin="-0.5s"></animate>
+  </circle>
+  <circle cx="70" cy="50" fill="#cf4420" r="20">
+    <animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1" values="30;70;30" begin="0s"></animate>
+  </circle>
+  <circle cx="30" cy="50" fill="#630031" r="20">
+    <animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1" values="30;70;30" begin="-0.5s"></animate>
+    <animate attributeName="fill-opacity" values="0;0;1;1" calcMode="discrete" keyTimes="0;0.499;0.5;1" dur="1s" repeatCount="indefinite"></animate>
+  </circle>
+  </svg>
+    </div>
+</div>
+
+
+
+
+</body>
+
+<script>
+$("#search_button").click(function(){
+
+  let search_text_input = $("#choices-text-preset-values").val();
+  let x = {"input_text": search_text_input};
+    $("#loading_icon").show();
+
+
+    $.ajax({
+      url:"/search",
+      type:"POST",
+      data:JSON.stringify(x),
+      contentType:"application/json",
+      success: function(data){
+        let search_html = "";
+
+          for(let i=0; i<data.length; i++){
+            search_result = data[i];
+            let id = search_result['id'];
+            let title = search_result['Title'];
+            let content = search_result['Content'];
+            search_html += `
+            <div class="result_row" id="search_result_${i}" style="width:100%; height: 80px; padding:1%; font-size:110%; cursor:pointer; border: 3px solid #CF4420; border-radius:8px; margin-bottom:1.2%;">
+              <div><span>ID: ${id}</span> <span style="font-weight:500;">${title}</span></div>
+              
+            </div>
+            `;
+          }
+
+          $("#search_results_wrapper").html(search_html);
+          $("#search_results_wrapper").show();
+
+          $("#loading_icon").hide();
+
+          $('html, body').animate({
+              scrollTop: $("#search_results_wrapper").offset().top
+          }, 500);
+      }
+    })
+
+});
+</script>
+</html>
